@@ -1,8 +1,28 @@
+#
+#      Copyright (C) 2011 Tommy Winther
+#      http://tommy.winther.nu
+#
+#  This Program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  This Program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with XBMC; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+#  http://www.gnu.org/copyleft/gpl.html
+#
 import re
 import os
 import sys
 import urllib2
-import cgi as urlparse
+import urlparse
+import buggalo
 
 import xbmcgui
 import xbmcaddon
@@ -22,22 +42,27 @@ CATEGORIES = [
 class Gametest(object):
     def showOverview(self):
         html = self.downloadUrl(BASE_URL)
+        infoLabels = dict()
 
         # Latest show
-        m = re.search('Sendt den ([^<]+).*?<ul>(.*?)</ul>', html, re.DOTALL)
-        date = m.group(1)
-        title = ADDON.getLocalizedString(30000) % date
-        games = m.group(2).replace('<li>', '').replace('</li>', '\n')
+        m = re.search('Sendt den ([^<]+)?.*?<ul>(.*?)</ul>', html, re.DOTALL)
+        if m:
+            date = m.group(1)
+            if date:
+                date = m.group(1).replace('-', '.')
+                infoLabels['title'] = ADDON.getLocalizedString(30000) + ': ' + date
+                infoLabels['date'] = date
+            else:
+                infoLabels['title'] = ADDON.getLocalizedString(30000)
+            infoLabels['plot'] = m.group(2).replace('<li>', '').replace('</li>', '\n')
+        else:
+            infoLabels['title'] = ADDON.getLocalizedString(30000)
 
         path = ADDON.getAddonInfo('path')
         icon = os.path.join(path, 'icon.png')
-        item = xbmcgui.ListItem(title, iconImage = icon)
+        item = xbmcgui.ListItem(infoLabels['title'], iconImage = icon)
         item.setProperty('Fanart_Image', FANART)
-        item.setInfo('video', {
-            'title' : title,
-            'plot' : str(ADDON.getLocalizedString(30001)) + games,
-            'date' : date.replace('-', '.')
-        })
+        item.setInfo('video', infoLabels)
         url = FLV_URL % ('file', 'Programmet')
         xbmcplugin.addDirectoryItem(HANDLE, url, item)
 
@@ -111,7 +136,7 @@ class Gametest(object):
 
 
 if __name__ == '__main__':
-    ADDON = xbmcaddon.Addon(id = 'plugin.video.gametest.dk')
+    ADDON = xbmcaddon.Addon()
     PATH = sys.argv[0]
     HANDLE = int(sys.argv[1])
     PARAMS = urlparse.parse_qs(sys.argv[2][1:])
@@ -119,12 +144,15 @@ if __name__ == '__main__':
     FANART = os.path.join(ADDON.getAddonInfo('path'), 'fanart.jpg')
 
     gt = Gametest()
-    if PARAMS.has_key('reviews'):
-        gt.showReviews()
-    elif PARAMS.has_key('retro'):
-        gt.showPage('retro')
-    elif PARAMS.has_key('stunts'):
-        gt.showPage('stunts')
-    else:
-        gt.showOverview()
+    try:
+        if PARAMS.has_key('reviews'):
+            gt.showReviews()
+        elif PARAMS.has_key('retro'):
+            gt.showPage('retro')
+        elif PARAMS.has_key('stunts'):
+            gt.showPage('stunts')
+        else:
+            gt.showOverview()
+    except Exception:
+        buggalo.onExceptionRaised()
 
