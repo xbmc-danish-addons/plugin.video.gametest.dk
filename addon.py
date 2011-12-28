@@ -58,9 +58,7 @@ class Gametest(object):
         else:
             infoLabels['title'] = ADDON.getLocalizedString(30000)
 
-        path = ADDON.getAddonInfo('path')
-        icon = os.path.join(path, 'icon.png')
-        item = xbmcgui.ListItem(infoLabels['title'], iconImage = icon)
+        item = xbmcgui.ListItem(infoLabels['title'], iconImage = ICON)
         item.setProperty('Fanart_Image', FANART)
         item.setInfo('video', infoLabels)
         url = FLV_URL % ('file', 'Programmet')
@@ -68,7 +66,7 @@ class Gametest(object):
 
         # Categories
         for idx, c in enumerate(CATEGORIES):
-            item = xbmcgui.ListItem(ADDON.getLocalizedString(c['title']), iconImage = icon)
+            item = xbmcgui.ListItem(ADDON.getLocalizedString(c['title']), iconImage = ICON)
             item.setProperty('Fanart_Image', FANART)
             url = PATH + '?' + c['params']
             xbmcplugin.addDirectoryItem(HANDLE, url, item, True)
@@ -141,6 +139,7 @@ if __name__ == '__main__':
     HANDLE = int(sys.argv[1])
     PARAMS = urlparse.parse_qs(sys.argv[2][1:])
 
+    ICON = os.path.join(ADDON.getAddonInfo('path'), 'icon.png')
     FANART = os.path.join(ADDON.getAddonInfo('path'), 'fanart.jpg')
 
     gt = Gametest()

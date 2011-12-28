@@ -1,4 +1,4 @@
-[B]Version 1.1.1 - 2011-12-xx[/B]
+[B]Version 2.0.0 - 2011-12-28[/B]
 - Fixed problem with parsing date of latest show resulting in a script error
 - Improved error handling with option for the user to submit exceptions/bugs
 
