@@ -1,5 +1,5 @@
-[B]Version 3.0.0 - 2013-06-02[/B]
-- Complete rewrite, site uses YouTube now
+[B]Version 2.0.1 - 2013-08-03[/B]
+- Merged changes from Frodo branch
 
 [B]Version 2.0.0 - 2011-12-28[/B]
 - Fixed problem with parsing date of latest show resulting in a script error
